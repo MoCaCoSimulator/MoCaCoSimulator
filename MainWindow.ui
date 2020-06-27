@@ -1,0 +1,886 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindowClass</class>
+ <widget class="QMainWindow" name="MainWindowClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1503</width>
+    <height>1128</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout_4">
+    <item>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QSplitter" name="splitter_3">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="opaqueResize">
+        <bool>true</bool>
+       </property>
+       <widget class="QWidget" name="characters" native="true">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>300</height>
+         </size>
+        </property>
+        <property name="baseSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_9">
+         <property name="leftMargin">
+          <number>9</number>
+         </property>
+         <property name="topMargin">
+          <number>9</number>
+         </property>
+         <property name="rightMargin">
+          <number>9</number>
+         </property>
+         <property name="bottomMargin">
+          <number>9</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="charactersLabel">
+           <property name="text">
+            <string>Characters</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="CharacterList" name="characterList">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="baseSize">
+            <size>
+             <width>0</width>
+             <height>360</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="animations" native="true">
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <property name="leftMargin">
+          <number>9</number>
+         </property>
+         <property name="topMargin">
+          <number>9</number>
+         </property>
+         <property name="rightMargin">
+          <number>9</number>
+         </property>
+         <property name="bottomMargin">
+          <number>9</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="animationsLabel">
+           <property name="text">
+            <string>Animations</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="tPoseButton">
+           <property name="text">
+            <string>T-Pose</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="AnimationList" name="animationList">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QAbstractScrollArea::AdjustToContents</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="selectAllButton">
+           <property name="text">
+            <string>Select All</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_2">
+           <property name="text">
+            <string>Unselect All</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="widget" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>512</width>
+         <height>0</height>
+        </size>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <widget class="QLabel" name="InformationLabel">
+          <property name="font">
+           <font>
+            <italic>true</italic>
+           </font>
+          </property>
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-style:normal;&quot;&gt;Preview&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0">
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="pushButton_3">
+            <property name="text">
+             <string>Toggle Skeleton</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_4">
+            <property name="text">
+             <string>Toggle Tracker Offsets</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="OpenGLWindow" name="openGLWindow">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>400</width>
+            <height>400</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="progressSlider">
+          <property name="maximum">
+           <number>10000</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QPushButton" name="pushButton">
+            <property name="text">
+             <string>Play</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="stopButton">
+            <property name="text">
+             <string>Stop</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QSplitter" name="splitter_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <widget class="QWidget" name="widget_2" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QLabel" name="ikKernelLabel">
+           <property name="text">
+            <string>IK Kernel</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="ikKernelComboBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="ikKernelOptionsLabel">
+           <property name="text">
+            <string>Options</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="IKKernelOptionsList" name="ikKernelOptionsList"/>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="widget_3" native="true">
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QLabel" name="trackerLabel">
+           <property name="text">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Placed Trackers (press space to add a new tracker, avatar has to be in T-Pose)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="TrackingVirtualizerList" name="trackerList">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>400</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="widget_4" native="true">
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="QLabel" name="errorMetricsLabel">
+           <property name="text">
+            <string>Error Metrics</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <property name="spacing">
+            <number>50</number>
+           </property>
+           <property name="leftMargin">
+            <number>150</number>
+           </property>
+           <property name="rightMargin">
+            <number>150</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="errorMetricsSampleRateLabel">
+             <property name="text">
+              <string>Samplerate:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="errorMetricsSampleRateSpinBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="baseSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximum">
+              <number>10000</number>
+             </property>
+             <property name="value">
+              <number>60</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="ErrorMetricList" name="errorMetricsList">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QPushButton" name="addMetricButton">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Add Metric</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="choosableMetricsComboBox"/>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="buttons" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QPushButton" name="runSimulationButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>50</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">&quot;background-color: red&quot;</string>
+         </property>
+         <property name="text">
+          <string>Run simulation</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1503</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionSave_Layout"/>
+    <addaction name="actionLoad_Layout"/>
+   </widget>
+   <addaction name="menuFile"/>
+  </widget>
+  <action name="actionSave_Layout">
+   <property name="text">
+    <string>Save Layout</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionLoad_Layout">
+   <property name="text">
+    <string>Load Layout</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>OpenGLWindow</class>
+   <extends>QOpenGLWidget</extends>
+   <header>Qt/openglwindow.h</header>
+   <slots>
+    <slot>OnPlayButtonPressed()</slot>
+    <slot>OnPauseButtonPressed()</slot>
+    <slot>OnStopButtonPressed()</slot>
+    <slot>OnProgressSliderValueChanged(int)</slot>
+    <slot>OnTPoseButtonPressed()</slot>
+    <slot>OnToggleSkeleton()</slot>
+    <slot>OnToggleTrackerOffsets()</slot>
+    <slot>OnTogglePlay()</slot>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>AnimationList</class>
+   <extends>QListWidget</extends>
+   <header>Qt/Animationlist.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TrackingVirtualizerList</class>
+   <extends>QListWidget</extends>
+   <header>Qt/Trackingvirtualizerlist.h</header>
+   <slots>
+    <signal>ValidateCalculationButton()</signal>
+    <signal>UpdateInformationText(QString)</signal>
+    <slot>OnIKKernelChanged(int)</slot>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>IKKernelOptionsList</class>
+   <extends>QListWidget</extends>
+   <header>Qt/ikkerneloptionslist.h</header>
+   <slots>
+    <slot>OnIKKernelChanged(int)</slot>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>ErrorMetricList</class>
+   <extends>QListView</extends>
+   <header>Qt/errormetriclist.h</header>
+   <slots>
+    <signal>ValidateCalculationButton()</signal>
+    <slot>AddNewErrorMetric()</slot>
+    <slot>SetErrorMetricIndex(int)</slot>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>CharacterList</class>
+   <extends>QListWidget</extends>
+   <header>Qt/characterlist.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>pushButton_3</tabstop>
+  <tabstop>pushButton_4</tabstop>
+  <tabstop>progressSlider</tabstop>
+  <tabstop>pushButton</tabstop>
+  <tabstop>stopButton</tabstop>
+  <tabstop>ikKernelComboBox</tabstop>
+  <tabstop>ikKernelOptionsList</tabstop>
+  <tabstop>trackerList</tabstop>
+  <tabstop>errorMetricsList</tabstop>
+  <tabstop>addMetricButton</tabstop>
+  <tabstop>choosableMetricsComboBox</tabstop>
+  <tabstop>runSimulationButton</tabstop>
+ </tabstops>
+ <resources>
+  <include location="MainWindow.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>actionSave_Layout</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindowClass</receiver>
+   <slot>OnSaveLayoutButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>708</x>
+     <y>589</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLoad_Layout</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindowClass</receiver>
+   <slot>OnLoadLayoutButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>708</x>
+     <y>589</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>trackerList</sender>
+   <signal>ValidateCalculationButton()</signal>
+   <receiver>MainWindowClass</receiver>
+   <slot>ValidateCalculationButton()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>950</x>
+     <y>549</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>838</x>
+     <y>38</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>runSimulationButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindowClass</receiver>
+   <slot>OnCalculationButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>145</x>
+     <y>1089</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>118</x>
+     <y>37</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ikKernelComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>trackerList</receiver>
+   <slot>OnIKKernelChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1138</x>
+     <y>79</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1163</x>
+     <y>549</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ikKernelComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>ikKernelOptionsList</receiver>
+   <slot>OnIKKernelChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1198</x>
+     <y>89</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1198</x>
+     <y>296</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>errorMetricsList</sender>
+   <signal>ValidateCalculationButton()</signal>
+   <receiver>MainWindowClass</receiver>
+   <slot>ValidateCalculationButton()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>969</x>
+     <y>814</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>679</x>
+     <y>39</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>openGLWindow</receiver>
+   <slot>OnTogglePlay()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>647</x>
+     <y>1014</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>487</x>
+     <y>935</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_4</sender>
+   <signal>clicked()</signal>
+   <receiver>openGLWindow</receiver>
+   <slot>OnToggleTrackerOffsets()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>655</x>
+     <y>93</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>656</x>
+     <y>239</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_3</sender>
+   <signal>clicked()</signal>
+   <receiver>openGLWindow</receiver>
+   <slot>OnToggleSkeleton()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>647</x>
+     <y>93</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>468</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>progressSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>openGLWindow</receiver>
+   <slot>OnProgressSliderValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>875</x>
+     <y>984</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>656</x>
+     <y>280</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>stopButton</sender>
+   <signal>pressed()</signal>
+   <receiver>openGLWindow</receiver>
+   <slot>OnStopButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>896</x>
+     <y>1014</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>656</x>
+     <y>764</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>choosableMetricsComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>errorMetricsList</receiver>
+   <slot>SetErrorMetricIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1483</x>
+     <y>1012</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1180</x>
+     <y>814</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>addMetricButton</sender>
+   <signal>pressed()</signal>
+   <receiver>errorMetricsList</receiver>
+   <slot>AddNewErrorMetric()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>996</x>
+     <y>1014</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>928</x>
+     <y>814</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>tPoseButton</sender>
+   <signal>clicked()</signal>
+   <receiver>openGLWindow</receiver>
+   <slot>OnTPoseButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>255</x>
+     <y>390</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>493</x>
+     <y>394</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>selectAllButton</sender>
+   <signal>clicked()</signal>
+   <receiver>animationList</receiver>
+   <slot>selectAll()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>279</x>
+     <y>986</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>274</x>
+     <y>932</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>animationList</sender>
+   <signal>itemSelectionChanged()</signal>
+   <receiver>MainWindowClass</receiver>
+   <slot>ValidateCalculationButton()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>244</x>
+     <y>765</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>397</x>
+     <y>35</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>animationList</receiver>
+   <slot>clearSelection()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>246</x>
+     <y>1007</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>240</x>
+     <y>897</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>OnCalculationButtonPressed()</slot>
+  <slot>ValidateCalculationButton()</slot>
+  <slot>OnSaveLayoutButtonPressed()</slot>
+  <slot>OnLoadLayoutButtonPressed()</slot>
+ </slots>
+</ui>
