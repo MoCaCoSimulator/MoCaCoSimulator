@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	EventManager::instance().SubscribeToEvent("SetProgressSliderValue", floatCallback);
 	std::function<void(std::string)> stringCallback = std::function([this](std::string value) { return this->OnLoadCharacterButtonPressed(value); });
 	EventManager::instance().SubscribeToEvent("OnLoadCharacterButtonPressed", stringCallback);
-	
+
 	OpenGLWindow* openGLWindow = static_cast<OpenGLWindow*>(ui.openGLWindow);
 	setupScene = new SetupScene();
 	openGLWindow->SetCurrentScene(setupScene);
@@ -90,7 +90,34 @@ Animation* MainWindow::CombineTrackerAnimations(const Animation& groundTruthAnim
 	return combinedAnimation;
 }
 
-void MainWindow::GenerateAnimations(std::string& modelfile, std::vector<std::string>& solvedAnimationPaths)
+void MainWindow::SkipIKSolver(const std::string& affix, std::string& modelfile, std::vector<std::string>& solvedAnimationPaths, std::vector<std::string>& truthAnimationPaths)
+{
+	std::vector<std::string> animationPaths = ui.animationList->GetSelectedAnimationPaths();
+
+	SetupScene* currentScene = dynamic_cast<SetupScene*>(ui.openGLWindow->GetCurrentScene());
+	if (!currentScene)
+		return;
+
+	Animator* animator = currentScene->GetAnimator();
+	SkinnedModel* model = animator->GetModel();
+	modelfile = model->getPath();
+
+	int counter = 0;
+	std::string dir = "";
+	for (std::string path : animationPaths)
+	{
+		Animation* groundTruthAnimation = Animation::LoadFromPath(path);
+
+		if (counter == 0)
+			dir = groundTruthAnimation->path + "../animations_solved_" + affix + "/";
+
+		std::string solvedPath = dir + groundTruthAnimation->filename;
+		solvedAnimationPaths.push_back(solvedPath);
+		truthAnimationPaths.push_back(path);
+	}
+}
+
+void MainWindow::GenerateAnimations(std::string& modelfile, std::vector<std::string>& solvedAnimationPaths, std::vector<std::string>& truthAnimationPaths)
 {
 	qDebug() << "Generate Animations";
 	std::vector<std::string> animationPaths = ui.animationList->GetSelectedAnimationPaths();
@@ -107,7 +134,7 @@ void MainWindow::GenerateAnimations(std::string& modelfile, std::vector<std::str
 	QProgressDialog progress("Starting comparision process..", "Abort", 0, numFiles, this);
 	progress.setWindowModality(Qt::WindowModal);
 
-	
+
 	BaseIKKernel* usedKernel = BaseIKKernel::registry()[ui.ikKernelComboBox->currentIndex()];
 
 	int counter = 0;
@@ -157,7 +184,7 @@ void MainWindow::GenerateAnimations(std::string& modelfile, std::vector<std::str
 		Animation* trackerAnimation = CombineTrackerAnimations(*groundTruthAnimation, trackerCurves);
 		trackerCurves.clear();
 		qDebug() << "Solve Animation";
-		
+
 		// Let the IK solver do its job
 		animator->GetModel()->SetDefaultPose();
 		Animation* solvedAnimation = usedKernel->Solve(*groundTruthAnimation, trackers, *model, *trackerAnimation);
@@ -166,11 +193,11 @@ void MainWindow::GenerateAnimations(std::string& modelfile, std::vector<std::str
 		Animation::SaveToPath(path, *solvedAnimation, solvedPath);
 
 		// Delete ground truth and solved animation from memory
-		delete trackerAnimation;
-		animator->RemoveAnimation(true);
+		animator->RemoveAnimation(true); //handles gt destruction
 		delete solvedAnimation;
 
 		solvedAnimationPaths.push_back(solvedPath);
+		truthAnimationPaths.push_back(path);
 	}
 
 	progress.setValue(numFiles);
@@ -178,10 +205,13 @@ void MainWindow::GenerateAnimations(std::string& modelfile, std::vector<std::str
 
 void MainWindow::OnCalculationButtonPressed()
 {
+	std::vector<std::string> animationPaths = ui.animationList->GetSelectedAnimationPaths();
+	std::vector<std::string> truthAnimationPaths;
 	std::vector<std::string> solvedAnimationPaths;
 	std::string characterModel;
 
-	GenerateAnimations(characterModel, solvedAnimationPaths);
+	GenerateAnimations(characterModel, solvedAnimationPaths, truthAnimationPaths);
+	//SkipIKSolver("dances_10", characterModel, solvedAnimationPaths, truthAnimationPaths);
 
 	ErrorMetricList* errorList = static_cast<ErrorMetricList*>(ui.errorMetricsList);
 
@@ -191,8 +221,7 @@ void MainWindow::OnCalculationButtonPressed()
 
 	int errorMetricsSampleRate = ui.errorMetricsSampleRateSpinBox->value();
 
-	std::vector<std::string> animationPaths = ui.animationList->GetSelectedAnimationPaths();
-	ResultsWindow* rw = new ResultsWindow(nullptr, characterModel, selectedErrorMetrics, animationPaths, solvedAnimationPaths, errorMetricsSampleRate);
+	ResultsWindow* rw = new ResultsWindow(nullptr, characterModel, selectedErrorMetrics, truthAnimationPaths, solvedAnimationPaths, errorMetricsSampleRate);
 
 	rw->show();
 	this->close();
@@ -248,8 +277,8 @@ void MainWindow::OnSaveLayoutButtonPressed()
 	json.insert("trackerList", ui.trackerList->SaveTrackers());
 	//Read ErrorMetrics
 	json.insert("metricList", ui.errorMetricsList->SaveSettings());
-	
-	//Save 
+
+	//Save
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Save Layout"), "layouts", tr("JSON files (*.json)"));
 	jsonDocument.setObject(json);
 	saveJson(jsonDocument, fileName);

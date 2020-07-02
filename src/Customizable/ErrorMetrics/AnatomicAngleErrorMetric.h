@@ -2,14 +2,14 @@
 
 #include "BaseErrorMetric.h"
 
-class PositionDifferenceErrorMetric : public BaseErrorMetric
+class AnatomicAngleErrorMetric : public BaseErrorMetric
 {
 public:
-	PositionDifferenceErrorMetric();
+	AnatomicAngleErrorMetric();
 
 	virtual bool CalculateDifference(const Pose& groundTruthPose, const Pose& solvedPose, float& result);
 
-	static RegisterBaseErrorMetric<PositionDifferenceErrorMetric> Register;
+	static RegisterBaseErrorMetric<AnatomicAngleErrorMetric> Register;
 
 	virtual BaseErrorMetric* Clone() const;
 };

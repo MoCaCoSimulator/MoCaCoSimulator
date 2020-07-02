@@ -33,5 +33,6 @@ private:
 	QJsonDocument loadJson(QString fileName);
 	bool GenerateTrackingVirtualizerAnimations(Animator& animator, const Animation& groundTruthAnimation, std::map<std::string, AnimationCurve>& output);
 	Animation* CombineTrackerAnimations(const Animation& groundTruthAnimation, const std::map<std::string, AnimationCurve>& trackerAnimations);
-	void GenerateAnimations(std::string& model, std::vector<std::string>& solvedAnimationPaths);
+	void SkipIKSolver(const std::string& affix, std::string& modelfile, std::vector<std::string>& solvedAnimationPaths, std::vector<std::string>& truthAnimationPaths);
+	void GenerateAnimations(std::string& model, std::vector<std::string>& solvedAnimationPaths, std::vector<std::string>& truthAnimationPaths);
 };

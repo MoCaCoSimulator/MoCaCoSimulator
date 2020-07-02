@@ -10,9 +10,6 @@ public:
     CustomEnums::AvatarJointType humanJointType;
     Transform* transform;
     Quaternion startRotation;
-    Matrix globalOffsetMatrix;
-    Matrix localOffsetMatrix;
-    Quaternion globalOffsetRotation;
 public:
     AnatomicAngleInformation* twistAnatomicAngleInformation;
     AnatomicAngleInformation* firstDOFAnatomicAngleInformation;

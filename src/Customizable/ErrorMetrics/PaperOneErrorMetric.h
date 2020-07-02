@@ -7,10 +7,10 @@
 // https://en.wikipedia.org/wiki/Quaternion: Geodesic norm
 class PaperOneErrorMetric : public BaseErrorMetric
 {
-protected:
-	virtual bool CalculateDifference(const Pose& groundTruthPose, const Pose& solvedPose, float& result);
 public:
 	PaperOneErrorMetric();
+
+	virtual bool CalculateDifference(const Pose& groundTruthPose, const Pose& solvedPose, float& result);
 
 	static RegisterBaseErrorMetric<PaperOneErrorMetric> Register;
 

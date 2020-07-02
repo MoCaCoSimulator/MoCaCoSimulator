@@ -164,9 +164,16 @@ void SetupScene::UpdateTrackerOffsetRepresentations()
 		TrackerOffsetRepresentation* representation = kv.second;
 		Matrix globalAnimatedTransform = tracker->GetModel()->getAnimationTransform();
 		globalAnimatedTransform = globalAnimatedTransform.translationMatrix() * globalAnimatedTransform.rotationMatrix();
-		Vector3 offsetPos = tracker->GetOffsetPosition();
-		Quaternion offsetRot = tracker->GetOffsetRotation();
+		//Vector3 offsetPos = tracker->GetOffsetPosition();
+		//Quaternion offsetRot = tracker->GetOffsetRotation();
 
+		Matrix offsetMat = tracker->GetOffsetMatrix();
+		//offsetMat = Matrix().translation(offsetMat.up() * 0.5f);//offsetMat.rotationMatrix() * Matrix().translation(Vector3::forward * 0.5f);
+		//offsetMat = Matrix().translation(Vector3::up * 0.5f);
+		//offsetMat = Matrix().translation(Vector3::up * 0.25f + offsetMat.up().normalize() * 0.25f);
+
+		Vector3 offsetPos = offsetMat.translation();
+		Quaternion offsetRot = offsetMat.rotation();
 		Matrix pointTransform = Matrix().translation(offsetPos) * offsetRot.toRotationMatrix() * Matrix().scale(representation->scale);
 		Matrix lineTransform = Matrix().translation(offsetPos) * Matrix().lookAt(offsetPos) * Matrix().scale(representation->scale, representation->scale, offsetPos.length());
 
@@ -554,31 +561,20 @@ void SetupScene::update(float dtime)
 	if (drawTrackerOffset)
 		UpdateTrackerOffsetRepresentations();
 
-	SkinnedModel* targetModel = (SkinnedModel*)findModel("FinalIKMan");
-
-	if (!targetModel)
-		return;
-
-	ikSolver->FixTransforms();
-	ikSolver->Update(dtime);
-
-	targetModel->UpdateJointMappingFromTransforms(transforms);
-	targetModel->UpdateBoneAnimation();
-
 	if (InputManager::GetKeyDown(InputManager::Keycode::Alt))
 	{
-		for (int jointType = 0; jointType < (int)CustomEnums::AvatarJointType::Head; jointType++)
+		for (int jointType = 0; jointType <= (int)CustomEnums::AvatarJointType::Head; jointType++)
 		{
 			AvatarJoint* joint = avatar->GetAvatarJoint((CustomEnums::AvatarJointType)jointType);
 			qDebug() << "Joint: " << QVariant::fromValue((CustomEnums::AvatarJointType)jointType).toString();
-
+			/*
 			Vector3 forward = joint->globalOffsetMatrix.rotation() * joint->transform->Forward();
 			Vector3 right = joint->globalOffsetMatrix.rotation() * joint->transform->Right();
 			Vector3 up = joint->globalOffsetMatrix.rotation() * joint->transform->Up();
 			qDebug() << "Forward: " << forward.toString().c_str();
 			qDebug() << "Up: " << up.toString().c_str();
 			qDebug() << "Right: " << right.toString().c_str();
-
+			*/
 			std::vector<CustomEnums::HumanAnatomicAngleType> angleTypes = avatar->GetAnatomicAngleTypesOfJoint(joint->humanJointType);
 
 			for (CustomEnums::HumanAnatomicAngleType angleType : angleTypes)
@@ -591,6 +587,17 @@ void SetupScene::update(float dtime)
 			qDebug() << "";
 		}
 	}
+
+	SkinnedModel* targetModel = (SkinnedModel*)findModel("FinalIKMan");
+
+	if (!targetModel)
+		return;
+
+	ikSolver->FixTransforms();
+	ikSolver->Update(dtime);
+
+	targetModel->UpdateJointMappingFromTransforms(transforms);
+	targetModel->UpdateBoneAnimation();
 }
 
 void SetupScene::handleInput()

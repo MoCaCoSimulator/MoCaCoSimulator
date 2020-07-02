@@ -7,7 +7,6 @@ WeightedPositionErrorMetric::WeightedPositionErrorMetric() :
 	BaseErrorMetric("Weighted Position Difference"),
 	longestBone(0)
 {
-	AddParameter(new Parameter<Enums::HumanJointType>("Joint", Enums::HumanJointType::All));
 }
 
 bool WeightedPositionErrorMetric::CalculateDifference(const Pose& groundTruthPose, const Pose& solvedPose, float& result)
@@ -19,6 +18,7 @@ bool WeightedPositionErrorMetric::CalculateDifference(const Pose& groundTruthPos
 				continue;
 
 			double boneLength = pair.second.localTransform.translation().length();
+			boneLength *= pair.second.globalTransform.scale().x;
 			if (boneLength > longestBone)
 				longestBone = boneLength;
 		}
@@ -31,8 +31,9 @@ bool WeightedPositionErrorMetric::CalculateDifference(const Pose& groundTruthPos
 	for (const std::pair<std::string, MeshModel::JointInfo>& pair : groundTruthPose.skinnedModel->GetJointMapping())
 	{
 		double boneWeight = pair.second.localTransform.translation().length() / longestBone;
+		boneWeight *= pair.second.globalTransform.scale().x;
 		if (pair.first == "Hips")
-			boneWeight = 1.0f;
+			boneWeight = 0.0f;
 
 		Vector3 groundTruthPosition = pair.second.globalTransform.translation();
 		Vector3 solvedPosition = solvedJointMapping[pair.first].globalTransform.translation();

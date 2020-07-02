@@ -123,7 +123,23 @@ void BaseFinalIKKernel::GenerateOffsets(std::map<std::string, Tracker*> trackers
 	for (const auto& kv : trackers)
 	{
 		Tracker* tracker = kv.second;
-		slotOffsetMap[kv.first] = tracker->GetOffsetMatrix();
+		const std::string& slotName = kv.first;
+		Matrix offset = tracker->GetOffsetMatrix();
+
+		if (slotName == "LeftForeArm" || slotName == "RightForeArm")
+		{
+			//offset = Matrix().translation(offset.up().normalize() * 0.5f);//Matrix().translation(Vector3::up * 0.5f);
+			offset = Matrix().translation(Vector3::up * 0.25f + offset.up().normalize() * 0.25f);
+			//offset = Matrix().translation(Vector3::up * 0.5f); //Matrix::identity;
+		}
+		else if (slotName == "LeftLeg" || slotName == "RightLeg")
+		{
+			//offset = Matrix().translation(offset.up().normalize() * 0.5f);//Matrix().translation(Vector3::up * 0.5f);
+			offset = Matrix().translation(Vector3::up * 0.25f + offset.up().normalize() * 0.25f);
+			//offset = Matrix::identity;
+		}
+
+		slotOffsetMap[slotName] = offset;
 	}
 }
 

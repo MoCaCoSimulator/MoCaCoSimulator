@@ -22,7 +22,7 @@
      <item>
       <widget class="QLabel" name="headerLabel">
        <property name="text">
-        <string>Ergebnisse</string>
+        <string>Results</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>

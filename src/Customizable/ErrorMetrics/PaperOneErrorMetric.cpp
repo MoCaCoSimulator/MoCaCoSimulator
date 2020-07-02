@@ -4,6 +4,8 @@ RegisterBaseErrorMetric<PaperOneErrorMetric> PaperOneErrorMetric::Register;
 
 PaperOneErrorMetric::PaperOneErrorMetric() : BaseErrorMetric("Paper One")
 {
+	needsVelocities = true;
+	needsAccelerations = true;
 }
 
 bool PaperOneErrorMetric::CalculateDifference(const Pose& groundTruthPose, const Pose& solvedPose, float& result)

@@ -34,4 +34,5 @@ public:
     int GetJointCount();
 private:
     void InitAvatarJoints();
+    CustomEnums::AxisType GetAxis(Vector3 dir, Transform* transform);
 };

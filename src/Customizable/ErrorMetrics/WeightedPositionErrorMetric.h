@@ -4,10 +4,10 @@
 
 class WeightedPositionErrorMetric : public BaseErrorMetric
 {
-protected:
-	virtual bool CalculateDifference(const Pose& groundTruthPose, const Pose& solvedPose, float& result);
 public:
 	WeightedPositionErrorMetric();
+
+	virtual bool CalculateDifference(const Pose& groundTruthPose, const Pose& solvedPose, float& result);
 
 	static RegisterBaseErrorMetric<WeightedPositionErrorMetric> Register;
 

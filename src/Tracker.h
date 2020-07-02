@@ -17,7 +17,7 @@ public:
 	const Vector3& GetOffsetPosition() const { return offsetPos; }
 	void SetOffsetRotation(const Quaternion& state) { offsetRot = state; }
 	const Quaternion& GetOffsetRotation() const { return offsetRot; }
-	const Matrix& GetOffsetMatrix() const { return Matrix().translation(offsetPos) * offsetRot.toRotationMatrix(); }
+	Matrix GetOffsetMatrix() const { return Matrix().translation(offsetPos) * offsetRot.toRotationMatrix(); }
 	void SetModel(AttachedModel* newModel) { model = newModel; }
 	AttachedModel* GetModel() const { return model; }
 	void SetSlot(const std::string& slotName);

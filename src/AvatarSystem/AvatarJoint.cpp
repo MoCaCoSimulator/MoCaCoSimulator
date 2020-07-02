@@ -7,17 +7,9 @@ AvatarJoint::AvatarJoint(CustomEnums::AvatarJointType humanJointType, Transform*
     transform(transform),
     firstDOFAnatomicAngleInformation(nullptr),
     secondDOFAnatomicAngleInformation(nullptr),
-    twistAnatomicAngleInformation(nullptr)
+    twistAnatomicAngleInformation(nullptr),
+    startRotation(transform->LocalRotation())
 {
-    Matrix tempMat = transform->LocalMatrix();
-    globalOffsetMatrix = tempMat.invert();
-    //localOffsetMatrix = transform->LocalMatrix().invert();
-    globalOffsetRotation = transform->GlobalMatrix().invert().rotation();
-
-    qDebug() << "globalOffsetMatrix: " << globalOffsetMatrix.rotation().toString().c_str();
-    qDebug() << "globalOffsetRotation: " << globalOffsetRotation.toString().c_str();
-
-    startRotation = transform->LocalRotation();// *localOffsetMatrix.rotation();
 }
 
 AvatarJoint::~AvatarJoint()
@@ -76,8 +68,6 @@ Vector3 AvatarJoint::GetAxis(CustomEnums::AxisType axisType, bool asStart)
                 positive = false;
             }
 
-            transform->LocalRotation(transform->LocalRotation() * globalOffsetMatrix.rotation());
-
             Vector3 abductionAxis = Vector3::zero;
             switch (info->rotationAxis)
             {
@@ -89,14 +79,10 @@ Vector3 AvatarJoint::GetAxis(CustomEnums::AxisType axisType, bool asStart)
                 case CustomEnums::AxisType::MinusRight: abductionAxis   = -transform->Right(); break;
             }
 
-            transform->LocalRotation(startRotation);
-
             float angle = positive ? -90 : 90;  
             transform->Rotate(abductionAxis, angle, Transform::Space::World);
         }
     }
-
-    transform->LocalRotation(transform->LocalRotation() * globalOffsetMatrix.rotation());
 
     switch (axisType)
     {
@@ -108,7 +94,8 @@ Vector3 AvatarJoint::GetAxis(CustomEnums::AxisType axisType, bool asStart)
         case CustomEnums::AxisType::MinusRight: axis = -transform->Right(); break;
     }
 
-    transform->LocalRotation(currentRotation);
+    if(asStart)
+        transform->LocalRotation(currentRotation);
 
     return axis;
 }

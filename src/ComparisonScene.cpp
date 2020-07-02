@@ -62,6 +62,8 @@ void ComparisonScene::start()
 	groundTruthSkinnedModel->setTransparency(TRANSPARENCY_FULL);
 	models.push_back(groundTruthSkinnedModel);
 
+	Avatar* groundTruthAvatar = new Avatar(groundTruthSkinnedModel);
+
 	Animator* groundTruthAnimator = new Animator(*groundTruthSkinnedModel);
 	animators.push_back(groundTruthAnimator);
 
@@ -78,6 +80,8 @@ void ComparisonScene::start()
 	solvedSkinnedModel->setTransparency(TRANSPARENCY_FULL);
 	models.push_back(solvedSkinnedModel);
 
+	Avatar* solvedAvatar = new Avatar(solvedSkinnedModel);
+
 	Animator* solvedAnimator = new Animator(*solvedSkinnedModel);
 	animators.push_back(solvedAnimator);
 
@@ -86,50 +90,156 @@ void ComparisonScene::start()
 	std::vector<float> resultsMatrix = std::vector<float>(maxX * maxY);
 	std::vector<std::string> columnNames;
 	std::vector<std::string> rowNames;
+	std::vector<std::string> finalSolvedAnimationPaths;
+	std::vector<std::string> finalTruthAnimationPaths;
 
 	std::vector<AnimationResults> combinedResults;
+	int row = 0;
 	for (int y = 0; y < groundTruthAnimationPaths.size(); ++y)
 	{
 		AnimationResults results;
 
-		Animation* groundTruthAnimation = Animation::LoadFromPath(groundTruthAnimationPaths[y]);
 		Animation* solvedAnimation = Animation::LoadFromPath(solvedAnimationPaths[y]);
-
+		if (!solvedAnimation)
+			continue;
+		Animation* groundTruthAnimation = Animation::LoadFromPath(groundTruthAnimationPaths[y]);
 		if (!groundTruthAnimation || !solvedAnimation)
 			continue;
+
+		finalSolvedAnimationPaths.push_back(solvedAnimationPaths[y]);
+		finalTruthAnimationPaths.push_back(groundTruthAnimationPaths[y]);
 
 		groundTruthAnimator->SetAnimation(groundTruthAnimation);
 		solvedAnimator->SetAnimation(solvedAnimation);
 
+		bool velocitiesNeeded = false;
+		bool accelerationsNeeded = false;
+		for (int a = 0; a < selectedErrorMetrics.size(); ++a)
+		{
+			if (selectedErrorMetrics[a]->needsVelocities)
+				velocitiesNeeded = true;
+			if (selectedErrorMetrics[a]->needsAccelerations)
+				accelerationsNeeded = true;
+			if (velocitiesNeeded && accelerationsNeeded)
+				break;
+		}
+
 		// Calulate sample times for the error metrics
 		std::vector<float> sampleTimes;
+		std::map<std::string, Vector3> prevGroundTruthPositions;
+		std::map<std::string, Vector3> prevGroundTruthVelocities;
+		std::map<std::string, Vector3> prevSolvedPositions;
+		std::map<std::string, Vector3> prevSolvedVelocities;
 		float animationLength = groundTruthAnimator->GetAnimationLength();
 		int frameCount = animationLength * errorMetricsSampleRate;
+		std::map<std::string, std::vector<float>> resultsMap;
 		for (size_t i = 0; i < frameCount; i++)
-			sampleTimes.push_back(animationLength * (i / (float)frameCount));
+		{
+			float sampleTime = animationLength * (i / (float)frameCount);
+			sampleTimes.push_back(sampleTime);
+
+			BaseErrorMetric::Pose groundTruthPose;
+			BaseErrorMetric::Pose solvedPose;
+
+			groundTruthPose.skinnedModel = groundTruthSkinnedModel;
+			solvedPose.skinnedModel = solvedSkinnedModel;
+
+			groundTruthPose.avatar = groundTruthAvatar;
+			solvedPose.avatar = solvedAvatar;
+
+			groundTruthPose.velocities.clear();
+			groundTruthPose.accelerations.clear();
+			solvedPose.velocities.clear();
+			solvedPose.accelerations.clear();
+
+			groundTruthAnimator->SetNormalizedAnimationTime(sampleTime / animationLength);
+			solvedAnimator->SetNormalizedAnimationTime(sampleTime / animationLength);
+
+			if (velocitiesNeeded || accelerationsNeeded)
+			{
+				std::map<std::string, Vector3> groundTruthVelocities = std::map<std::string, Vector3>();
+				std::map<std::string, Vector3> solvedVelocities = std::map<std::string, Vector3>();
+
+				// Calculate velocity
+				if (i > 0 && (velocitiesNeeded || accelerationsNeeded))
+				{
+					for (std::pair<std::string, MeshModel::JointInfo> pair : groundTruthSkinnedModel->GetJointMapping())
+						groundTruthVelocities[pair.first] = pair.second.transform.translation() - prevGroundTruthPositions[pair.first];
+
+					groundTruthPose.velocities = groundTruthVelocities;
+
+					for (std::pair<std::string, MeshModel::JointInfo> pair : solvedSkinnedModel->GetJointMapping())
+						solvedVelocities[pair.first] = pair.second.transform.translation() - prevSolvedPositions[pair.first];
+
+					solvedPose.velocities = solvedVelocities;
+				}
+
+				// Calculate acceleration
+				if (i > 1 && accelerationsNeeded)
+				{
+					std::map<std::string, Vector3> groundTruthAccelerations = std::map<std::string, Vector3>();
+					std::map<std::string, Vector3> solvedAccelerations = std::map<std::string, Vector3>();
+
+					for (std::pair<std::string, MeshModel::JointInfo> pair : groundTruthSkinnedModel->GetJointMapping())
+						groundTruthAccelerations[pair.first] = groundTruthVelocities[pair.first] - prevGroundTruthVelocities[pair.first];
+
+					groundTruthPose.accelerations = groundTruthAccelerations;
+
+					for (std::pair<std::string, MeshModel::JointInfo> pair : solvedSkinnedModel->GetJointMapping())
+						solvedAccelerations[pair.first] = solvedVelocities[pair.first] - prevGroundTruthVelocities[pair.first];
+
+					solvedPose.accelerations = solvedAccelerations;
+				}
+
+				for (std::pair<std::string, MeshModel::JointInfo> pair : groundTruthSkinnedModel->GetJointMapping())
+					prevGroundTruthPositions[pair.first] = pair.second.transform.translation();
+
+				for (std::pair<std::string, MeshModel::JointInfo> pair : solvedSkinnedModel->GetJointMapping())
+					prevSolvedPositions[pair.first] = pair.second.transform.translation();
+
+				prevGroundTruthVelocities = groundTruthVelocities;
+				prevSolvedVelocities = solvedVelocities;
+			}
+
+			for (int x = 0; x < selectedErrorMetrics.size(); ++x)
+			{
+				std::string metricName = dynamic_cast<Parameter<std::string>*>(selectedErrorMetrics[x]->GetParameters().at("Name"))->GetValue();
+
+				if (metricName == "")
+					metricName = "ErrorMetric " + x;
+
+				float result;
+				bool success = selectedErrorMetrics[x]->CalculateDifference(groundTruthPose, solvedPose, result);
+				if (success)
+					resultsMap[metricName].push_back(result);
+				else
+					resultsMap[metricName].push_back(NAN);
+			}
+		}
 
 		std::string animationName = groundTruthAnimation->name;
+		qDebug() << animationName.c_str();
 		rowNames.push_back(animationName);
-		qDebug() << "Animation: " << animationName.c_str();
 
-		std::map<std::string, std::vector<float>> resultsMap;
 		for (int x = 0; x < selectedErrorMetrics.size(); ++x)
 		{
-			std::vector<float> resultsVector = selectedErrorMetrics[x]->CalculateValues(groundTruthSkinnedModel, solvedSkinnedModel, groundTruthAnimator, solvedAnimator, sampleTimes);
-			resultsMap[selectedErrorMetrics[x]->GetName()] = resultsVector;
+			std::string metricName = dynamic_cast<Parameter<std::string>*>(selectedErrorMetrics[x]->GetParameters().at("Name"))->GetValue();
+
+			if (metricName == "")
+				metricName = "ErrorMetric " + x;
 
 			float combined = 0.0f;
 			int resultCount = 0;
-			for (size_t i = 0; i < resultsVector.size(); i++)
+			for (size_t i = 0; i < resultsMap[metricName].size(); i++)
 			{
-				float result = resultsVector[i];
+				float result = resultsMap[metricName][i];
 				if (std::isnan(result))
 					continue;
 				combined += result;
 				resultCount++;
 			}
 
-			resultsMatrix[y * maxX + x] = combined / resultCount;
+			resultsMatrix[row * maxX + x] = combined / resultCount;
 		}
 
 		results.name = animationName;
@@ -138,17 +248,22 @@ void ComparisonScene::start()
 
 		combinedResults.push_back(results);
 
-		delete solvedAnimation;
-		delete groundTruthAnimation;
+		//removeanimation handles animation destruction
+		groundTruthAnimator->RemoveAnimation(true);
+		solvedAnimator->RemoveAnimation(true);
+
+		row++;
 	}
+
+	solvedAnimationPaths = finalSolvedAnimationPaths;
+	groundTruthAnimationPaths = finalTruthAnimationPaths;
 
 	for (int x = 0; x < selectedErrorMetrics.size(); ++x)
 	{
-		columnNames.push_back(selectedErrorMetrics[x]->GetName());
+		std::string metricName = dynamic_cast<Parameter<std::string>*>(selectedErrorMetrics[x]->GetParameters().at("Name"))->GetValue();
+		qDebug() << metricName.c_str();
+		columnNames.push_back(metricName);
 	}
-
-	groundTruthAnimator->RemoveAnimation();
-	solvedAnimator->RemoveAnimation();
 
 	qDebug() << "END CALCULATION";
 
@@ -258,14 +373,24 @@ void ComparisonScene::SaveErrorMetricResults(std::vector<AnimationResults> combi
 		AnimationResults result = combinedResults[animationIndex];
 
 		tx::XMLElement* sheet = doc.NewElement("Worksheet");
-		sheet->SetAttribute("ss:Name", result.name.c_str());
+		sheet->SetAttribute("ss:Name", animationIndex);//result.name.c_str());
 
 		tx::XMLElement* table = doc.NewElement("Table");
 
-		// Headerrow
-		tx::XMLElement* headerRow = doc.NewElement("Row");
+		// Namerow
+		tx::XMLElement* nameRow = doc.NewElement("Row");
 		tx::XMLElement* cell = doc.NewElement("Cell");
 		tx::XMLElement* data = doc.NewElement("Data");
+		data->SetAttribute("ss:Type", "String");
+		data->SetText(result.name.c_str());
+		cell->InsertEndChild(data);
+		nameRow->InsertEndChild(cell);
+		table->InsertEndChild(nameRow);
+
+		// Headerrow
+		tx::XMLElement* headerRow = doc.NewElement("Row");
+		cell = doc.NewElement("Cell");
+		data = doc.NewElement("Data");
 		data->SetAttribute("ss:Type", "String");
 		data->SetText("Time");
 		cell->InsertEndChild(data);

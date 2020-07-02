@@ -34,7 +34,7 @@ private:
 	void SaveErrorMetricResults(std::vector<AnimationResults> combinedResults);
 public:
 	ComparisonScene(std::string modelfile,std::vector<BaseErrorMetric*> selectedErrorMetrics, std::vector<std::string> groundTruthAnimationPaths, std::vector<std::string> solvedAnimationPaths, int errorMetricsSampleRate);
-	~ComparisonScene();
+	~ComparisonScene(); 
 
 	virtual void start();
 	virtual void update(float dtime);

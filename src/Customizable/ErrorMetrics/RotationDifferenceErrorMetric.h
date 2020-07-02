@@ -4,10 +4,10 @@
 
 class RotationDifferenceErrorMetric : public BaseErrorMetric
 {
-protected:
-	virtual bool CalculateDifference(const Pose& groundTruthPose, const Pose& solvedPose, float& result);
 public:
 	RotationDifferenceErrorMetric();
+
+	virtual bool CalculateDifference(const Pose& groundTruthPose, const Pose& solvedPose, float& result);
 
 	static RegisterBaseErrorMetric<RotationDifferenceErrorMetric> Register;
 

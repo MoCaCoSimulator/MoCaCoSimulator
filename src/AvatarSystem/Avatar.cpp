@@ -16,6 +16,35 @@ Avatar::~Avatar()
     avatarJoints.clear();
 }
 
+CustomEnums::AxisType Avatar::GetAxis(Vector3 dir, Transform* transform)
+{
+    std::map<CustomEnums::AxisType, float> pairs;
+    float forward = Vector3::AngleDegree(dir, transform->Forward());
+    pairs[CustomEnums::AxisType::Forward] = forward;
+    float minusForward = Vector3::AngleDegree(dir, -transform->Forward());
+    pairs[CustomEnums::AxisType::MinusForward] = minusForward;
+    float right = Vector3::AngleDegree(dir, transform->Right());
+    pairs[CustomEnums::AxisType::Right] = right;
+    float minusRight = Vector3::AngleDegree(dir, -transform->Right());
+    pairs[CustomEnums::AxisType::MinusRight] = minusRight;
+    float up = Vector3::AngleDegree(dir, transform->Up());
+    pairs[CustomEnums::AxisType::Up] = up;
+    float minusUp = Vector3::AngleDegree(dir, -transform->Up());
+    pairs[CustomEnums::AxisType::MinusUp] = minusUp;
+
+    float minAngle = std::numeric_limits<float>::max();
+    CustomEnums::AxisType axisType = CustomEnums::AxisType::Forward;
+    for(auto item : pairs)
+    {
+        if (item.second < minAngle)
+        {
+            minAngle = item.second;
+            axisType = item.first;
+        }
+    }
+    return axisType;
+}
+
 float Avatar::GetAnatomicAngle(CustomEnums::AvatarJointType jointType, CustomEnums::HumanAnatomicAngleType humanAnatomicAngle)
 {
     skinnedModel->UpdateTransformsFromJointMapping(transforms);
@@ -130,7 +159,6 @@ float Avatar::GetAnatomicAngle(CustomEnums::AvatarJointType jointType, CustomEnu
                 for (int i = 0; i < chosenCombination.size(); i++)
                 {
                     Vector3 rotationAxis = avatarJoint->GetAxis(chosenCombination[i]->rotationAxis, true);
-                    //rotationAxis = avatarJoint->globalOffsetMatrix.rotation().inverse() * rotationAxis;
                     avatarJoint->transform->Rotate(rotationAxis, -chosenAngles[i], Transform::Space::World);
                 }
 
@@ -195,13 +223,9 @@ std::vector<float> Avatar::CalculateAnatomicAnglesInOrder(AvatarJoint& avatarJoi
 
     for(AnatomicAngleInformation* anatomicAngleInformation : ordererAnatomicAngleInformations)
     {
-        if (avatarJoint.humanJointType == CustomEnums::AvatarJointType::LeftShoulder)
-            qDebug() << "Here";
-
         float angle = CalculateCurrentAngle(avatarJoint, anatomicAngleInformation->rotationAxis);
         calculatedAngles.push_back(angle);
         Vector3 rotationAxis = avatarJoint.GetAxis(anatomicAngleInformation->rotationAxis, true);
-        //rotationAxis = avatarJoint.globalOffsetMatrix.rotation().inverse() * rotationAxis;
         avatarJoint.transform->Rotate(rotationAxis, -angle, Transform::Space::World);
     }
 
@@ -229,6 +253,9 @@ void Avatar::InitAvatarJoints()
 {
     for (Transform* transform : transforms)
     {
+        CustomEnums::AxisType frontalAxis = GetAxis(skinnedModel->GetRoot().GlobalTrans.forward(), transform);  // Forward
+        CustomEnums::AxisType longitudinalAxis = GetAxis(skinnedModel->GetRoot().GlobalTrans.up(), transform);  // Up
+        CustomEnums::AxisType transverseAxis = GetAxis(skinnedModel->GetRoot().GlobalTrans.right(), transform); // Right
 
         #pragma region All
 
@@ -239,9 +266,9 @@ void Avatar::InitAvatarJoints()
         if (transform->Name() == "Hips")
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::CenterHip, transform);
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Up, CustomEnums::HumanAnatomicAngleType::RotationLeft, CustomEnums::HumanAnatomicAngleType::RotationRight);
-            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Forward, CustomEnums::HumanAnatomicAngleType::LateralLeft, CustomEnums::HumanAnatomicAngleType::LateralRight);
-            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Right, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::RotationLeft, CustomEnums::HumanAnatomicAngleType::RotationRight);
+            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(frontalAxis, CustomEnums::HumanAnatomicAngleType::LateralLeft, CustomEnums::HumanAnatomicAngleType::LateralRight);
+            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
             avatarJoints.push_back(avatarJoint);
         }
 
@@ -252,9 +279,9 @@ void Avatar::InitAvatarJoints()
         if (transform->Name() == "Spine")
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::Spine, transform);
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Up, CustomEnums::HumanAnatomicAngleType::RotationLeft, CustomEnums::HumanAnatomicAngleType::RotationRight);
-            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Forward, CustomEnums::HumanAnatomicAngleType::LateralLeft, CustomEnums::HumanAnatomicAngleType::LateralRight);
-            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Right, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::RotationLeft, CustomEnums::HumanAnatomicAngleType::RotationRight);
+            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(frontalAxis, CustomEnums::HumanAnatomicAngleType::LateralLeft, CustomEnums::HumanAnatomicAngleType::LateralRight);
+            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
             avatarJoints.push_back(avatarJoint);
         }
 
@@ -263,18 +290,18 @@ void Avatar::InitAvatarJoints()
         if (transform->Name() == "Spine1")
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::Chest, transform);
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Up, CustomEnums::HumanAnatomicAngleType::RotationLeft, CustomEnums::HumanAnatomicAngleType::RotationRight);
-            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Forward, CustomEnums::HumanAnatomicAngleType::LateralLeft, CustomEnums::HumanAnatomicAngleType::LateralRight);
-            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Right, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::RotationLeft, CustomEnums::HumanAnatomicAngleType::RotationRight);
+            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(frontalAxis, CustomEnums::HumanAnatomicAngleType::LateralLeft, CustomEnums::HumanAnatomicAngleType::LateralRight);
+            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
             avatarJoints.push_back(avatarJoint);
         }
 
         if (transform->Name() == "Spine2")
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::UpperChest, transform);
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Up, CustomEnums::HumanAnatomicAngleType::RotationLeft, CustomEnums::HumanAnatomicAngleType::RotationRight);
-            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Forward, CustomEnums::HumanAnatomicAngleType::LateralLeft, CustomEnums::HumanAnatomicAngleType::LateralRight);
-            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Right, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::RotationLeft, CustomEnums::HumanAnatomicAngleType::RotationRight);
+            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(frontalAxis, CustomEnums::HumanAnatomicAngleType::LateralLeft, CustomEnums::HumanAnatomicAngleType::LateralRight);
+            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
             avatarJoints.push_back(avatarJoint);
         }
 
@@ -285,35 +312,35 @@ void Avatar::InitAvatarJoints()
         if (transform->Name() == "LeftShoulder")
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::LeftUpperChest, transform);
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::MinusRight, CustomEnums::HumanAnatomicAngleType::RotationInside, CustomEnums::HumanAnatomicAngleType::RotationOutside);
-            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Forward, CustomEnums::HumanAnatomicAngleType::Abduktion, CustomEnums::HumanAnatomicAngleType::Adduktion);
-            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::MinusUp, CustomEnums::HumanAnatomicAngleType::Extension, CustomEnums::HumanAnatomicAngleType::Flexion);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis,CustomEnums::HumanAnatomicAngleType::RotationOutside, CustomEnums::HumanAnatomicAngleType::RotationInside);
+            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(frontalAxis, CustomEnums::HumanAnatomicAngleType::Abduktion, CustomEnums::HumanAnatomicAngleType::Adduktion);
+            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
             avatarJoints.push_back(avatarJoint);
         }
 
         if (transform->Name() == "LeftArm")
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::LeftShoulder, transform);
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::MinusRight, CustomEnums::HumanAnatomicAngleType::RotationInside, CustomEnums::HumanAnatomicAngleType::RotationOutside);
-            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Forward, CustomEnums::HumanAnatomicAngleType::Adduktion, CustomEnums::HumanAnatomicAngleType::Abduktion);
-            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::MinusUp, CustomEnums::HumanAnatomicAngleType::Extension, CustomEnums::HumanAnatomicAngleType::Flexion);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis, CustomEnums::HumanAnatomicAngleType::RotationOutside, CustomEnums::HumanAnatomicAngleType::RotationInside);
+            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(frontalAxis, CustomEnums::HumanAnatomicAngleType::Adduktion, CustomEnums::HumanAnatomicAngleType::Abduktion);
+            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
             avatarJoints.push_back(avatarJoint);
         }
 
         if (transform->Name() == "LeftForeArm")
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::LeftElbow, transform);
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::MinusRight, CustomEnums::HumanAnatomicAngleType::RotationInside, CustomEnums::HumanAnatomicAngleType::RotationOutside);
-            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::MinusUp, CustomEnums::HumanAnatomicAngleType::Extension, CustomEnums::HumanAnatomicAngleType::Flexion);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis, CustomEnums::HumanAnatomicAngleType::RotationOutside, CustomEnums::HumanAnatomicAngleType::RotationInside);
+            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
             avatarJoints.push_back(avatarJoint);
         }
 
         if (transform->Name() == "LeftHand")
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::LeftWrist, transform);
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::MinusRight, CustomEnums::HumanAnatomicAngleType::RotationRight, CustomEnums::HumanAnatomicAngleType::RotationLeft);
-            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Forward, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
-            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::MinusUp, CustomEnums::HumanAnatomicAngleType::UlnarAbduktion, CustomEnums::HumanAnatomicAngleType::RadialAbduktion);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis, CustomEnums::HumanAnatomicAngleType::RotationLeft, CustomEnums::HumanAnatomicAngleType::RotationRight);
+            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(frontalAxis, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
+            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::RadialAbduktion, CustomEnums::HumanAnatomicAngleType::UlnarAbduktion);
             avatarJoints.push_back(avatarJoint);
         }
 
@@ -324,9 +351,9 @@ void Avatar::InitAvatarJoints()
         if (transform->Name() == "RightShoulder")
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::RightUpperChest, transform);
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Right, CustomEnums::HumanAnatomicAngleType::RotationOutside, CustomEnums::HumanAnatomicAngleType::RotationInside);
-            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Forward, CustomEnums::HumanAnatomicAngleType::Abduktion, CustomEnums::HumanAnatomicAngleType::Adduktion);
-            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Up, CustomEnums::HumanAnatomicAngleType::Extension, CustomEnums::HumanAnatomicAngleType::Flexion);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis, CustomEnums::HumanAnatomicAngleType::RotationOutside, CustomEnums::HumanAnatomicAngleType::RotationInside);
+            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(frontalAxis, CustomEnums::HumanAnatomicAngleType::Abduktion, CustomEnums::HumanAnatomicAngleType::Adduktion);
+            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::Extension, CustomEnums::HumanAnatomicAngleType::Flexion);
             avatarJoints.push_back(avatarJoint);
         }
 
@@ -334,9 +361,9 @@ void Avatar::InitAvatarJoints()
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::RightShoulder, transform);
 
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Right, CustomEnums::HumanAnatomicAngleType::RotationOutside, CustomEnums::HumanAnatomicAngleType::RotationInside);
-            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Forward, CustomEnums::HumanAnatomicAngleType::Abduktion, CustomEnums::HumanAnatomicAngleType::Adduktion);
-            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Up, CustomEnums::HumanAnatomicAngleType::Extension, CustomEnums::HumanAnatomicAngleType::Flexion);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis, CustomEnums::HumanAnatomicAngleType::RotationOutside, CustomEnums::HumanAnatomicAngleType::RotationInside);
+            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(frontalAxis, CustomEnums::HumanAnatomicAngleType::Abduktion, CustomEnums::HumanAnatomicAngleType::Adduktion);
+            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::Extension, CustomEnums::HumanAnatomicAngleType::Flexion);
 
             avatarJoints.push_back(avatarJoint);
         }
@@ -344,17 +371,17 @@ void Avatar::InitAvatarJoints()
         if (transform->Name() == "RightForeArm")
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::RightElbow, transform);
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Right, CustomEnums::HumanAnatomicAngleType::RotationOutside, CustomEnums::HumanAnatomicAngleType::RotationInside);
-            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Up, CustomEnums::HumanAnatomicAngleType::Extension, CustomEnums::HumanAnatomicAngleType::Flexion);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis, CustomEnums::HumanAnatomicAngleType::RotationOutside, CustomEnums::HumanAnatomicAngleType::RotationInside);
+            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::Extension, CustomEnums::HumanAnatomicAngleType::Flexion);
             avatarJoints.push_back(avatarJoint);
         }
 
         if (transform->Name() == "RightHand")
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::RightWrist, transform);
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Right, CustomEnums::HumanAnatomicAngleType::RotationOutside, CustomEnums::HumanAnatomicAngleType::RotationInside);
-            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Forward, CustomEnums::HumanAnatomicAngleType::Extension, CustomEnums::HumanAnatomicAngleType::Flexion);
-            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Up, CustomEnums::HumanAnatomicAngleType::UlnarAbduktion, CustomEnums::HumanAnatomicAngleType::RadialAbduktion);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis, CustomEnums::HumanAnatomicAngleType::RotationOutside, CustomEnums::HumanAnatomicAngleType::RotationInside);
+            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(frontalAxis, CustomEnums::HumanAnatomicAngleType::Extension, CustomEnums::HumanAnatomicAngleType::Flexion);
+            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::UlnarAbduktion, CustomEnums::HumanAnatomicAngleType::RadialAbduktion);
             avatarJoints.push_back(avatarJoint);
         }
 
@@ -365,26 +392,26 @@ void Avatar::InitAvatarJoints()
         if (transform->Name() == "LeftUpLeg")
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::LeftHip, transform);
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::MinusUp, CustomEnums::HumanAnatomicAngleType::RotationInside, CustomEnums::HumanAnatomicAngleType::RotationOutside);
-            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Forward, CustomEnums::HumanAnatomicAngleType::Adduktion, CustomEnums::HumanAnatomicAngleType::Abduktion);
-            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Right, CustomEnums::HumanAnatomicAngleType::Extension, CustomEnums::HumanAnatomicAngleType::Flexion);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::RotationOutside, CustomEnums::HumanAnatomicAngleType::RotationInside);
+            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(frontalAxis, CustomEnums::HumanAnatomicAngleType::Adduktion, CustomEnums::HumanAnatomicAngleType::Abduktion);
+            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis, CustomEnums::HumanAnatomicAngleType::Extension, CustomEnums::HumanAnatomicAngleType::Flexion);
             avatarJoints.push_back(avatarJoint);
         }
 
         if (transform->Name() == "LeftLeg")
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::LeftKnee, transform);
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::MinusUp, CustomEnums::HumanAnatomicAngleType::RotationInside, CustomEnums::HumanAnatomicAngleType::RotationOutside);
-            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Right, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::RotationOutside, CustomEnums::HumanAnatomicAngleType::RotationInside);
+            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
             avatarJoints.push_back(avatarJoint);
         }
 
         if (transform->Name() == "LeftFoot")
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::LeftAnkle, transform);
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::MinusUp, CustomEnums::HumanAnatomicAngleType::RotationInside, CustomEnums::HumanAnatomicAngleType::RotationOutside);
-            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Forward, CustomEnums::HumanAnatomicAngleType::Adduktion, CustomEnums::HumanAnatomicAngleType::Abduktion);
-            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Right, CustomEnums::HumanAnatomicAngleType::Extension, CustomEnums::HumanAnatomicAngleType::Flexion);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::RotationOutside, CustomEnums::HumanAnatomicAngleType::RotationInside);
+            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(frontalAxis, CustomEnums::HumanAnatomicAngleType::Adduktion, CustomEnums::HumanAnatomicAngleType::Abduktion);
+            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis, CustomEnums::HumanAnatomicAngleType::Extension, CustomEnums::HumanAnatomicAngleType::Flexion);
             avatarJoints.push_back(avatarJoint);
         }
 
@@ -395,26 +422,26 @@ void Avatar::InitAvatarJoints()
         if (transform->Name() == "RightUpLeg")
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::RightHip, transform);
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::MinusUp, CustomEnums::HumanAnatomicAngleType::RotationOutside, CustomEnums::HumanAnatomicAngleType::RotationInside);
-            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Forward, CustomEnums::HumanAnatomicAngleType::Abduktion, CustomEnums::HumanAnatomicAngleType::Adduktion);
-            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Right, CustomEnums::HumanAnatomicAngleType::Extension, CustomEnums::HumanAnatomicAngleType::Flexion);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::RotationInside, CustomEnums::HumanAnatomicAngleType::RotationOutside);
+            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(frontalAxis, CustomEnums::HumanAnatomicAngleType::Abduktion, CustomEnums::HumanAnatomicAngleType::Adduktion);
+            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis, CustomEnums::HumanAnatomicAngleType::Extension, CustomEnums::HumanAnatomicAngleType::Flexion);
             avatarJoints.push_back(avatarJoint);
         }
 
         if (transform->Name() == "RightLeg")
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::RightKnee, transform);
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::MinusUp, CustomEnums::HumanAnatomicAngleType::RotationOutside, CustomEnums::HumanAnatomicAngleType::RotationInside);
-            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Right, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::RotationInside, CustomEnums::HumanAnatomicAngleType::RotationOutside);
+            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
             avatarJoints.push_back(avatarJoint);
         }
 
         if (transform->Name() == "RightFoot")
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::RightAnkle, transform);
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::MinusUp, CustomEnums::HumanAnatomicAngleType::RotationOutside, CustomEnums::HumanAnatomicAngleType::RotationInside);
-            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Forward, CustomEnums::HumanAnatomicAngleType::Abduktion, CustomEnums::HumanAnatomicAngleType::Adduktion);
-            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Right, CustomEnums::HumanAnatomicAngleType::Extension, CustomEnums::HumanAnatomicAngleType::Flexion);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::RotationInside, CustomEnums::HumanAnatomicAngleType::RotationOutside);
+            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(frontalAxis, CustomEnums::HumanAnatomicAngleType::Abduktion, CustomEnums::HumanAnatomicAngleType::Adduktion);
+            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis, CustomEnums::HumanAnatomicAngleType::Extension, CustomEnums::HumanAnatomicAngleType::Flexion);
             avatarJoints.push_back(avatarJoint);
         }
 
@@ -425,18 +452,18 @@ void Avatar::InitAvatarJoints()
         if (transform->Name() == "Neck")
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::Neck, transform);
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Up, CustomEnums::HumanAnatomicAngleType::RotationLeft, CustomEnums::HumanAnatomicAngleType::RotationRight);
-            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Forward, CustomEnums::HumanAnatomicAngleType::LateralLeft, CustomEnums::HumanAnatomicAngleType::LateralRight);
-            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Right, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::RotationLeft, CustomEnums::HumanAnatomicAngleType::RotationRight);
+            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(frontalAxis, CustomEnums::HumanAnatomicAngleType::LateralLeft, CustomEnums::HumanAnatomicAngleType::LateralRight);
+            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
             avatarJoints.push_back(avatarJoint);
         }
 
         if (transform->Name() == "Head")
         {
             AvatarJoint* avatarJoint = new AvatarJoint(CustomEnums::AvatarJointType::Head, transform);
-            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Up, CustomEnums::HumanAnatomicAngleType::RotationLeft, CustomEnums::HumanAnatomicAngleType::RotationRight);
-            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Forward, CustomEnums::HumanAnatomicAngleType::LateralLeft, CustomEnums::HumanAnatomicAngleType::LateralRight);
-            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(CustomEnums::AxisType::Right, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
+            avatarJoint->twistAnatomicAngleInformation = new AnatomicAngleInformation(longitudinalAxis, CustomEnums::HumanAnatomicAngleType::RotationLeft, CustomEnums::HumanAnatomicAngleType::RotationRight);
+            avatarJoint->firstDOFAnatomicAngleInformation = new AnatomicAngleInformation(frontalAxis, CustomEnums::HumanAnatomicAngleType::LateralLeft, CustomEnums::HumanAnatomicAngleType::LateralRight);
+            avatarJoint->secondDOFAnatomicAngleInformation = new AnatomicAngleInformation(transverseAxis, CustomEnums::HumanAnatomicAngleType::Flexion, CustomEnums::HumanAnatomicAngleType::Extension);
             avatarJoints.push_back(avatarJoint);
         }
 
